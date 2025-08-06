@@ -14,6 +14,9 @@ RUN apt-get update \
         gcc \
         python3-dev \
         libpq-dev \
+        libffi-dev \
+        libssl-dev \
+        curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
