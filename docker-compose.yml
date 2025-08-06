@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    container_name: task_management_db
+    environment:
+      POSTGRES_DB: task_management
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - task_management_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis (Optional - for Celery if you enable it later)
+  redis:
+    image: redis:7-alpine
+    container_name: task_management_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - task_management_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI Application
+  app:
+    build: .
+    container_name: task_management_app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:admin@postgres:5432/task_management
+      - SECRET_KEY=a7816f7f9f1d85dd1abb294491cec98f26dd9ad8704573678c393e85143382bf
+      - REDIS_URL=redis://redis:6379/0
+      - ENABLE_CELERY=false
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_PORT=587
+      - SMTP_USER=pravinkannan18@gmail.com
+      - SMTP_PASSWORD=your_smtp_password
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - task_management_network
+    volumes:
+      - .:/app
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  task_management_network:
+    driver: bridge

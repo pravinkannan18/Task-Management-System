@@ -4,10 +4,12 @@ from typing import Optional
 from app.models import TaskStatus
 
 class UserBase(BaseModel):
+    name: str
     email: str
 
 class UserCreate(UserBase):
     password: str
+    confirm_password: str
 
 class User(UserBase):
     id: int

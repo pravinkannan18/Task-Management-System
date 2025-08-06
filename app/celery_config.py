@@ -25,7 +25,7 @@ celery.conf.beat_schedule = {
 
 @celery.task
 def send_task_notification(user_id: int, task_id: int, event: str):
-    from app.email import send_email
+    from app.email_utils import send_email
     from app.database import SessionLocal
     from app.crud import get_user, get_task
 
@@ -42,9 +42,10 @@ def send_task_notification(user_id: int, task_id: int, event: str):
 
 @celery.task
 def send_overdue_summary():
-    from app.email import send_email
+    from app.email_utils import send_email
     from app.database import SessionLocal
     from app.crud import get_tasks
+    from app import models
     from datetime import datetime
 
     db = SessionLocal()

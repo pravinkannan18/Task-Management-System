@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    container_name: task_management_db_dev
+    environment:
+      POSTGRES_DB: task_management
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    networks:
+      - task_management_network
+
+  # FastAPI Application with hot reload
+  app:
+    build: .
+    container_name: task_management_app_dev
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:admin@postgres:5432/task_management
+      - SECRET_KEY=dev-secret-key-change-in-production
+      - ENABLE_CELERY=false
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_PORT=587
+      - SMTP_USER=pravinkannan18@gmail.com
+      - SMTP_PASSWORD=your_smtp_password
+    depends_on:
+      - postgres
+    networks:
+      - task_management_network
+    volumes:
+      - .:/app  # Mount current directory for hot reload
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+volumes:
+  postgres_data_dev:
+
+networks:
+  task_management_network:
+    driver: bridge
