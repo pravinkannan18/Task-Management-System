@@ -26,7 +26,7 @@ class ProjectCreate(ProjectBase):
 
 class Project(ProjectBase):
     id: int
-    user_id: int
+    owner_id: int
 
     class Config:
         orm_mode = True
