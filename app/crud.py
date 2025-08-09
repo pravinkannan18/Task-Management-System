@@ -57,7 +57,7 @@ def create_task(db: Session, task: schemas.TaskCreate, user_id: int):
        return db_task
 
 def get_tasks(db: Session, user_id: int, status: str = None, priority: int = None, due_date: datetime = None, project_id: int = None, sort_by: str = None, order: str = "asc", page: int = 1, per_page: int = 10):
-    query = db.query(models.Task).join(models.Project).filter(models.Project.user_id == user_id)
+    query = db.query(models.Task).join(models.Project).filter(models.Project.owner_id == user_id)
     if status:
         query = query.filter(models.Task.status == status)
     if priority:
@@ -72,7 +72,7 @@ def get_tasks(db: Session, user_id: int, status: str = None, priority: int = Non
     return query.offset((page - 1) * per_page).limit(per_page).all()
 
 def get_task(db: Session, task_id: int, user_id: int):
-    return db.query(models.Task).join(models.Project).filter(models.Task.id == task_id, models.Project.user_id == user_id).first()
+    return db.query(models.Task).join(models.Project).filter(models.Task.id == task_id, models.Project.owner_id == user_id).first()
 
 def update_task(db: Session, task_id: int, task: schemas.TaskCreate, user_id: int):
     db_task = get_task(db, task_id, user_id)
